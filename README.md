@@ -98,7 +98,12 @@ interface Movement {
 
 ## Priorités d'implémentation
 
-1. **Setup projet** NextJS + ShadcnUI + Jotai
+1. **Setup projet** NextJS + ShadcnUI + Jotai - ✅ **Fait**
+
+### Configuration de Shadcn/UI et Jotai
+
+- **Shadcn/UI** a été initialisé avec succès. Les composants seront installés dans `src/components/ui` et les utilitaires dans `src/lib/utils.ts`.
+- **Jotai** a été installé et est prêt à être utilisé pour la gestion de l'état global.
 2. **Authentification** basique fonctionnelle
 3. **Dashboard** avec données mockées
 4. **Mouvements** CRUD complet
