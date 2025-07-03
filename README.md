@@ -1,4 +1,4 @@
-# Prompt pour Gemini CLI - Application de Gestion Financière
+# Application de Gestion Financière
 
 ## Contexte
 
