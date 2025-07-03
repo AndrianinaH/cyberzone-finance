@@ -8,17 +8,19 @@ export async function POST(request: Request) {
     const { name, email, password } = await request.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json({ message: 'Name, email, and password are required' }, { status: 400 });
+      return NextResponse.json(
+        { message: "Name, email, and password are required" },
+        { status: 400 },
+      );
     }
 
     const hashedPassword = await hashPassword(password);
 
-    const newUser = await db.insert(users).values({
+    await db.insert(users).values({
       name,
       email,
       password: hashedPassword,
     });
-    console.log("🚀 ~ newUser ~ newUser:", newUser);
 
     return NextResponse.json(
       { message: "User registered successfully" },

@@ -25,12 +25,7 @@ export default function LoginPage() {
           <Button type="submit" className="w-full">
             Se connecter
           </Button>
-          <div className="text-center text-sm">
-            Pas encore de compte ?{" "}
-            <Link href="/auth/register" className="underline">
-              S'inscrire
-            </Link>
-          </div>
+          
         </form>
       </div>
     </div>
