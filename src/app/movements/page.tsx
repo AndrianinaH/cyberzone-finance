@@ -9,15 +9,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { Movement } from "@/types";
 import { AddMovementModal } from "@/components/AddMovementModal";
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { EditMovementModal } from "@/components/EditMovementModal";
 
 export default function MovementsPage() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
   const { toast } = useToast();
 
   const fetchMovements = useCallback(async () => {
@@ -50,6 +54,42 @@ export default function MovementsPage() {
   useEffect(() => {
     fetchMovements();
   }, [fetchMovements]);
+
+  const handleEdit = (movement: Movement) => {
+    setSelectedMovement(movement);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/movements?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Succès",
+          description: "Mouvement supprimé avec succès.",
+          variant: "success",
+        });
+        fetchMovements();
+      } else {
+        const errorData = await res.json();
+        toast({
+          title: "Erreur",
+          description: errorData.message || "Erreur lors de la suppression du mouvement.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete movement:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de se connecter au serveur.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -107,13 +147,29 @@ export default function MovementsPage() {
                         {new Date(movement.date).toLocaleDateString()}
                       </TableCell>
                       <TableCell>{movement.responsible}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm" className="mr-2">
-                          Éditer
+                      <TableCell className="flex items-center space-x-2">
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(movement)}>
+                          <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="destructive" size="sm">
-                          Supprimer
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Cette action ne peut pas être annulée. Cela supprimera définitivement ce mouvement de nos serveurs.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(movement.id)}>Continuer</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </TableCell>
                     </TableRow>
                   ))
@@ -132,6 +188,15 @@ export default function MovementsPage() {
           <Plus className="h-6 w-6" />
         </Button>
       </AddMovementModal>
+
+      {selectedMovement && (
+        <EditMovementModal
+          isOpen={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          movement={selectedMovement}
+          onMovementUpdated={fetchMovements}
+        />
+      )}
     </div>
   );
 }

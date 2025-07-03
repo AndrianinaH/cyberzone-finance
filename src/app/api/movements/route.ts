@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     const session = await getServerSession(authOptions as any);
 
     if (!session || !session.user) {
-      return new NextResponse("Non autorisé", { status: 401 });
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     return NextResponse.json(userMovements);
   } catch (error) {
     console.error("Error fetching movements:", error);
-    return new NextResponse("Erreur interne du serveur", { status: 500 });
+    return NextResponse.json({ message: "Erreur interne du serveur" }, { status: 500 });
   }
 }
 
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions as any);
 
     if (!session || !session.user) {
-      return new NextResponse("Non autorisé", { status: 401 });
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -59,9 +59,7 @@ export async function POST(req: Request) {
       !author ||
       !responsible
     ) {
-      return new NextResponse("Tous les champs requis ne sont pas fournis", {
-        status: 400,
-      });
+      return NextResponse.json({ message: "Tous les champs requis ne sont pas fournis" }, { status: 400 });
     }
 
     const amountMGA =
@@ -80,9 +78,107 @@ export async function POST(req: Request) {
       responsible: responsible,
     });
 
-    return new NextResponse("Mouvement ajouté avec succès", { status: 201 });
+    return NextResponse.json({ message: "Mouvement ajouté avec succès" }, { status: 201 });
   } catch (error) {
     console.error("Error adding movement:", error);
+    return NextResponse.json({ message: "Erreur interne du serveur" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const session = await getServerSession(authOptions as any);
+
+    if (!session || !session.user) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return new NextResponse("ID du mouvement manquant", { status: 400 });
+    }
+
+    const userId = session.user.id;
+    const body = await req.json();
+    const {
+      type,
+      amount,
+      currency,
+      exchangeRate,
+      description,
+      date,
+      responsible,
+    } = body;
+
+    if (
+      !type ||
+      !amount ||
+      !currency ||
+      !description ||
+      !date ||
+      !responsible
+    ) {
+      return new NextResponse("Tous les champs requis ne sont pas fournis", {
+        status: 400,
+      });
+    }
+
+    const amountMGA =
+      currency === "MGA" ? amount : amount * (exchangeRate || 1);
+
+    await db
+      .update(movements)
+      .set({
+        type: type,
+        amount: amount.toString(),
+        currency: currency,
+        exchangeRate: exchangeRate ? exchangeRate.toString() : undefined,
+        amountMGA: amountMGA.toString(),
+        description: description,
+        date: new Date(date),
+        responsible: responsible,
+      })
+      .where(eq(movements.id, parseInt(id)))
+      .where(eq(movements.userId, userId));
+
+    return new NextResponse("Mouvement mis à jour avec succès", {
+      status: 200,
+    });
+  } catch (error) {
+    console.error("Error updating movement:", error);
+    return new NextResponse("Erreur interne du serveur", { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const session = await getServerSession(authOptions as any);
+
+    if (!session || !session.user) {
+      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return new NextResponse("ID du mouvement manquant", { status: 400 });
+    }
+
+    const userId = session.user.id;
+
+    await db
+      .delete(movements)
+      .where(eq(movements.id, parseInt(id)))
+      .where(eq(movements.userId, userId));
+
+    return new NextResponse("Mouvement supprimé avec succès", { status: 200 });
+  } catch (error) {
+    console.error("Error deleting movement:", error);
     return new NextResponse("Erreur interne du serveur", { status: 500 });
   }
 }
