@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { movements } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 export async function GET(req: Request) {
   try {
@@ -14,17 +14,18 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
-    const userId = session.user.id;
-
     const userMovements = await db
       .select()
       .from(movements)
-      .where(eq(movements.userId, userId));
+      .orderBy(desc(movements.id));
 
     return NextResponse.json(userMovements);
   } catch (error) {
     console.error("Error fetching movements:", error);
-    return NextResponse.json({ message: "Erreur interne du serveur" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Erreur interne du serveur" },
+      { status: 500 },
+    );
   }
 }
 
@@ -59,7 +60,10 @@ export async function POST(req: Request) {
       !author ||
       !responsible
     ) {
-      return NextResponse.json({ message: "Tous les champs requis ne sont pas fournis" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Tous les champs requis ne sont pas fournis" },
+        { status: 400 },
+      );
     }
 
     const amountMGA =
@@ -78,10 +82,16 @@ export async function POST(req: Request) {
       responsible: responsible,
     });
 
-    return NextResponse.json({ message: "Mouvement ajouté avec succès" }, { status: 201 });
+    return NextResponse.json(
+      { message: "Mouvement ajouté avec succès" },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Error adding movement:", error);
-    return NextResponse.json({ message: "Erreur interne du serveur" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Erreur interne du serveur" },
+      { status: 500 },
+    );
   }
 }
 
@@ -98,7 +108,10 @@ export async function PUT(req: Request) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return new NextResponse("ID du mouvement manquant", { status: 400 });
+      return NextResponse.json(
+        { message: "ID du mouvement manquant" },
+        { status: 400 },
+      );
     }
 
     const userId = session.user.id;
@@ -121,9 +134,10 @@ export async function PUT(req: Request) {
       !date ||
       !responsible
     ) {
-      return new NextResponse("Tous les champs requis ne sont pas fournis", {
-        status: 400,
-      });
+      return NextResponse.json(
+        { message: "Tous les champs requis ne sont pas fournis" },
+        { status: 400 },
+      );
     }
 
     const amountMGA =
@@ -132,24 +146,27 @@ export async function PUT(req: Request) {
     await db
       .update(movements)
       .set({
-        type: type,
+        type,
         amount: amount.toString(),
-        currency: currency,
+        currency,
         exchangeRate: exchangeRate ? exchangeRate.toString() : undefined,
         amountMGA: amountMGA.toString(),
-        description: description,
+        description,
         date: new Date(date),
-        responsible: responsible,
+        responsible,
       })
-      .where(eq(movements.id, parseInt(id)))
-      .where(eq(movements.userId, userId));
+      .where(and(eq(movements.id, parseInt(id)), eq(movements.userId, userId)));
 
-    return new NextResponse("Mouvement mis à jour avec succès", {
-      status: 200,
-    });
+    return NextResponse.json(
+      { message: "Mouvement mis à jour avec succès" },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Error updating movement:", error);
-    return new NextResponse("Erreur interne du serveur", { status: 500 });
+    return NextResponse.json(
+      { message: "Erreur interne du serveur" },
+      { status: 500 },
+    );
   }
 }
 
@@ -166,19 +183,27 @@ export async function DELETE(req: Request) {
     const id = searchParams.get("id");
 
     if (!id) {
-      return new NextResponse("ID du mouvement manquant", { status: 400 });
+      return NextResponse.json(
+        { message: "ID du mouvement manquant" },
+        { status: 400 },
+      );
     }
 
     const userId = session.user.id;
 
     await db
       .delete(movements)
-      .where(eq(movements.id, parseInt(id)))
-      .where(eq(movements.userId, userId));
+      .where(and(eq(movements.id, parseInt(id)), eq(movements.userId, userId)));
 
-    return new NextResponse("Mouvement supprimé avec succès", { status: 200 });
+    return NextResponse.json(
+      { message: "Mouvement supprimé avec succès" },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Error deleting movement:", error);
-    return new NextResponse("Erreur interne du serveur", { status: 500 });
+    return NextResponse.json(
+      { message: "Erreur interne du serveur" },
+      { status: 500 },
+    );
   }
 }
