@@ -106,10 +106,15 @@ interface Movement {
 - **Jotai** a été installé et est prêt à être utilisé pour la gestion de l'état global.
 
 2. **Authentification** basique fonctionnelle - ✅ **Fait**
+   - Design de la page de connexion amélioré : suppression du fond de carte sur mobile, ajout d'une image de fond pour la version desktop (actuellement un placeholder).
+
 3. **Dashboard** avec données mockées - ✅ **Fait**
 4. **Mouvements** CRUD complet - ✅ **Fait**
 5. **Polish UI/UX** final - ✅ **Fait** (Navigation globale, Dark Mode et tous les composants ShadcnUI nécessaires ajoutés)
 6. **Profil utilisateur** - ✅ **Fait**
+   - Page de profil refactorisée avec des onglets (Shadcn UI Tabs) pour séparer la modification du nom/email et la gestion du mot de passe.
+   - Mise à jour de la session utilisateur corrigée pour refléter les dernières modifications du profil.
+   - Messages d'erreur du serveur traduits en français pour les API de profil et de mot de passe.
 
 ## Contraintes Importantes
 
