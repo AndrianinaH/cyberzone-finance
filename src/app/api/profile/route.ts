@@ -11,14 +11,14 @@ export async function PUT(req: Request) {
     const session = await getServerSession(authOptions as any);
 
     if (!session || !session.user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse("Non autorisé", { status: 401 });
     }
 
     const body = await req.json();
     const { name, email } = body;
 
     if (!name || !email) {
-      return new NextResponse("Name and email are required", { status: 400 });
+      return new NextResponse("Le nom et l'email sont requis", { status: 400 });
     }
 
     const userId = session.user.id;
@@ -33,7 +33,7 @@ export async function PUT(req: Request) {
       existingUserWithEmail.length > 0 &&
       existingUserWithEmail[0].id !== userId
     ) {
-      return new NextResponse("Email already in use", { status: 409 });
+      return new NextResponse("Cet email est déjà utilisé", { status: 409 });
     }
 
     await db
@@ -47,6 +47,6 @@ export async function PUT(req: Request) {
     return NextResponse.json({ message: "Profile updated successfully" });
   } catch (error) {
     console.error("Error updating profile:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return new NextResponse("Erreur interne du serveur", { status: 500 });
   }
 }

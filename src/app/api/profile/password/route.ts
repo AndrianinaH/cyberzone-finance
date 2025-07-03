@@ -11,16 +11,14 @@ export async function PUT(req: Request) {
     const session = await getServerSession(authOptions as any);
 
     if (!session || !session.user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse("Non autorisé", { status: 401 });
     }
 
     const body = await req.json();
     const { currentPassword, newPassword } = body;
 
     if (!currentPassword || !newPassword) {
-      return new NextResponse("Current and new passwords are required", {
-        status: 400,
-      });
+      return new NextResponse("Le mot de passe actuel et le nouveau mot de passe sont requis", { status: 400 });
     }
 
     const userId = session.user.id;
@@ -30,13 +28,13 @@ export async function PUT(req: Request) {
     });
 
     if (!user) {
-      return new NextResponse("User not found", { status: 404 });
+      return new NextResponse("Utilisateur introuvable", { status: 404 });
     }
 
     const passwordMatch = await comparePassword(currentPassword, user.password);
 
     if (!passwordMatch) {
-      return new NextResponse("Invalid current password", { status: 401 });
+      return new NextResponse("Mot de passe actuel invalide", { status: 401 });
     }
 
     const hashedNewPassword = await hashPassword(newPassword);
@@ -51,6 +49,6 @@ export async function PUT(req: Request) {
     return NextResponse.json({ message: "Password updated successfully" });
   } catch (error) {
     console.error("Error updating password:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return new NextResponse("Erreur interne du serveur", { status: 500 });
   }
 }

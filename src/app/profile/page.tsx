@@ -45,10 +45,16 @@ export default function ProfilePage() {
           variant: "success",
         });
       } else {
-        const errorData = await res.json();
+        let errorMessage = "Une erreur est survenue lors de la mise à jour du profil.";
+        if (res.headers.get('content-type')?.includes('application/json')) {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorMessage;
+        } else {
+          errorMessage = await res.text();
+        }
         toast({
           title: "Erreur de mise à jour",
-          description: errorData.message || "Une erreur est survenue lors de la mise à jour du profil.",
+          description: errorMessage,
           variant: "destructive",
         });
       }
@@ -92,10 +98,16 @@ export default function ProfilePage() {
         setNewPassword("");
         setConfirmNewPassword("");
       } else {
-        const errorData = await res.json();
+        let errorMessage = "Une erreur est survenue lors de la mise à jour du mot de passe.";
+        if (res.headers.get('content-type')?.includes('application/json')) {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorMessage;
+        } else {
+          errorMessage = await res.text();
+        }
         toast({
           title: "Erreur de mise à jour du mot de passe",
-          description: errorData.message || "Une erreur est survenue lors de la mise à jour du mot de passe.",
+          description: errorMessage,
           variant: "destructive",
         });
       }
