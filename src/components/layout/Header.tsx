@@ -17,9 +17,7 @@ import {
 export default function Header() {
   const pathname = usePathname();
   const isAuthRoute = pathname.startsWith("/auth");
-  const { data: session, status } = useSession();
-  console.log("Session status:", status);
-  console.log("Session data:", session);
+  const { status } = useSession();
 
   return (
     <header className="flex h-16 items-center justify-between px-4 md:px-6 border-b">
