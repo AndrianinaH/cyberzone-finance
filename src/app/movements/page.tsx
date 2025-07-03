@@ -41,7 +41,7 @@ export default function MovementsPage() {
       const res = await fetch("/api/movements");
       if (res.ok) {
         const data: Movement[] = await res.json();
-        setMovements([...data, ...data, ...data, ...data]);
+        setMovements([...data]);
       } else {
         const errorData = await res.json();
         toast({
