@@ -104,10 +104,11 @@ interface Movement {
 
 - **Shadcn/UI** a été initialisé avec succès. Les composants seront installés dans `src/components/ui` et les utilitaires dans `src/lib/utils.ts`.
 - **Jotai** a été installé et est prêt à être utilisé pour la gestion de l'état global.
-2. **Authentification** basique fonctionnelle
-3. **Dashboard** avec données mockées
-4. **Mouvements** CRUD complet
-5. **Polish UI/UX** final
+2. **Authentification** basique fonctionnelle - ✅ **Fait**
+3. **Dashboard** avec données mockées - ✅ **Fait**
+4. **Mouvements** CRUD complet - ✅ **Fait**
+5. **Polish UI/UX** final - ✅ **Fait** (Navigation globale, Dark Mode et tous les composants ShadcnUI nécessaires ajoutés)
+6. **Profil utilisateur** - ✅ **Fait**
 
 ## Contraintes Importantes
 
