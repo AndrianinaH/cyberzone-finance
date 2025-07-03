@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { movements } from "@/drizzle/schema";
 import { and, desc, eq } from "drizzle-orm";
+import { DEFAULT_EXCHANGE_RATES, calculateAmountMGA } from "@/lib/currency";
 
 export async function GET(req: Request) {
   try {
@@ -66,15 +67,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const amountMGA =
-      currency === "MGA" ? amount : amount * (exchangeRate || 1);
+    const finalExchangeRate = exchangeRate || DEFAULT_EXCHANGE_RATES[currency];
+    const amountMGA = calculateAmountMGA(amount, currency, finalExchangeRate);
 
     await db.insert(movements).values({
       userId: userId,
       type: type,
       amount: amount.toString(), // Drizzle stores numeric as string
       currency: currency,
-      exchangeRate: exchangeRate ? exchangeRate.toString() : undefined,
+      exchangeRate: finalExchangeRate
+        ? finalExchangeRate.toString()
+        : undefined,
       amountMGA: amountMGA.toString(),
       description: description,
       date: new Date(date),
@@ -140,16 +143,18 @@ export async function PUT(req: Request) {
       );
     }
 
-    const amountMGA =
-      currency === "MGA" ? amount : amount * (exchangeRate || 1);
+    const finalExchangeRate = exchangeRate || DEFAULT_EXCHANGE_RATES[currency];
+    const amountMGA = calculateAmountMGA(amount, currency, finalExchangeRate);
 
     await db
       .update(movements)
       .set({
         type,
         amount: amount.toString(),
-        currency,
-        exchangeRate: exchangeRate ? exchangeRate.toString() : undefined,
+        currency: currency,
+        exchangeRate: finalExchangeRate
+          ? finalExchangeRate.toString()
+          : undefined,
         amountMGA: amountMGA.toString(),
         description,
         date: new Date(date),

@@ -15,6 +15,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useSession } from "next-auth/react";
+import { DEFAULT_EXCHANGE_RATES } from "@/lib/currency";
 
 interface AddMovementModalProps {
   children: React.ReactNode;
@@ -77,7 +78,7 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
       type: movementType,
       amount: parseFloat(amount),
       currency,
-      exchangeRate: exchangeRate ? parseFloat(exchangeRate) : undefined,
+      exchangeRate: exchangeRate ? parseFloat(exchangeRate) : DEFAULT_EXCHANGE_RATES[currency],
       description,
       date: date?.toISOString(),
       author: session.user.name,

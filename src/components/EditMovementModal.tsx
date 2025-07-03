@@ -15,6 +15,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Movement } from "@/types";
+import { DEFAULT_EXCHANGE_RATES } from "@/lib/currency";
 
 interface EditMovementModalProps {
   isOpen: boolean;
@@ -81,7 +82,7 @@ export function EditMovementModal({ isOpen, onOpenChange, movement, onMovementUp
       type: movementType,
       amount: parseFloat(amount),
       currency,
-      exchangeRate: exchangeRate ? parseFloat(exchangeRate) : undefined,
+      exchangeRate: exchangeRate ? parseFloat(exchangeRate) : DEFAULT_EXCHANGE_RATES[currency],
       description,
       date: date?.toISOString(),
       responsible,
