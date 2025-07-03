@@ -12,23 +12,128 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import * as React from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { useSession } from "next-auth/react";
 
 interface AddMovementModalProps {
   children: React.ReactNode;
+  onMovementAdded: () => void;
 }
 
-export function AddMovementModal({ children }: AddMovementModalProps) {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
-  const [movementType, setMovementType] = React.useState<"entry" | "exit">("entry");
+export function AddMovementModal({ children, onMovementAdded }: AddMovementModalProps) {
+  const { data: session } = useSession();
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [movementType, setMovementType] = useState<"entry" | "exit">("entry");
+  const [amount, setAmount] = useState<string>("");
+  const [currency, setCurrency] = useState<string>("MGA");
+  const [exchangeRate, setExchangeRate] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [responsible, setResponsible] = useState<string>("");
+  const [usersList, setUsersList] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch("/api/users");
+        if (res.ok) {
+          const data = await res.json();
+          setUsersList(data);
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Erreur lors du chargement des utilisateurs.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de se connecter au serveur pour les utilisateurs.",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchUsers();
+  }, [toast]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!session?.user?.name) {
+      toast({
+        title: "Erreur",
+        description: "Vous devez être connecté pour ajouter un mouvement.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newMovement = {
+      type: movementType,
+      amount: parseFloat(amount),
+      currency,
+      exchangeRate: exchangeRate ? parseFloat(exchangeRate) : undefined,
+      description,
+      date: date?.toISOString(),
+      author: session.user.name,
+      responsible,
+    };
+
+    try {
+      const res = await fetch("/api/movements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newMovement),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Succès",
+          description: "Mouvement ajouté avec succès.",
+          variant: "success",
+        });
+        setOpen(false);
+        // Reset form fields
+        setAmount("");
+        setCurrency("MGA");
+        setExchangeRate("");
+        setDescription("");
+        setResponsible("");
+        setDate(new Date());
+        onMovementAdded(); // Notify parent to refresh
+      } else {
+        const errorData = await res.json();
+        toast({
+          title: "Erreur",
+          description: errorData.message || "Erreur lors de l'ajout du mouvement.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to add movement:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de se connecter au serveur.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Ajouter un Mouvement</DialogTitle>
         </DialogHeader>
-        <form className="grid gap-4 py-4">
+        <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="type" className="text-right">
               Type
@@ -51,13 +156,13 @@ export function AddMovementModal({ children }: AddMovementModalProps) {
             <Label htmlFor="amount" className="text-right">
               Montant
             </Label>
-            <Input id="amount" type="number" placeholder="0.00" className="col-span-3" />
+            <Input id="amount" type="number" placeholder="0.00" className="col-span-3" value={amount} onChange={(e) => setAmount(e.target.value)} />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="currency" className="text-right">
               Devise
             </Label>
-            <Select defaultValue="MGA">
+            <Select defaultValue="MGA" value={currency} onValueChange={setCurrency}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Sélectionner une devise" />
               </SelectTrigger>
@@ -74,13 +179,13 @@ export function AddMovementModal({ children }: AddMovementModalProps) {
             <Label htmlFor="exchangeRate" className="text-right">
               Taux de change
             </Label>
-            <Input id="exchangeRate" type="number" placeholder="1.00" className="col-span-3" />
+            <Input id="exchangeRate" type="number" placeholder="1.00" className="col-span-3" value={exchangeRate} onChange={(e) => setExchangeRate(e.target.value)} />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="description" className="text-right">
               Description
             </Label>
-            <Textarea id="description" placeholder="Description du mouvement" className="col-span-3" />
+            <Textarea id="description" placeholder="Description du mouvement" className="col-span-3" value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="date" className="text-right">
@@ -113,13 +218,16 @@ export function AddMovementModal({ children }: AddMovementModalProps) {
             <Label htmlFor="responsible" className="text-right">
               Responsable
             </Label>
-            <Select>
+            <Select value={responsible} onValueChange={setResponsible}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Sélectionner un responsable" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="user1">John Doe</SelectItem>
-                <SelectItem value="user2">Jane Smith</SelectItem>
+                {usersList.map((user) => (
+                  <SelectItem key={user.id} value={user.name}>
+                    {user.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

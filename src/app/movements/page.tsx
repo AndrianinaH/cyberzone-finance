@@ -12,7 +12,7 @@ import {
 import { Plus } from "lucide-react";
 import { Movement } from "@/types";
 import { AddMovementModal } from "@/components/AddMovementModal";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function MovementsPage() {
@@ -20,36 +20,36 @@ export default function MovementsPage() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchMovements = async () => {
-      try {
-        const res = await fetch("/api/movements");
-        if (res.ok) {
-          const data: Movement[] = await res.json();
-          setMovements(data);
-        } else {
-          const errorData = await res.json();
-          toast({
-            title: "Erreur",
-            description:
-              errorData.message || "Erreur lors du chargement des mouvements.",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch movements:", error);
+  const fetchMovements = useCallback(async () => {
+    try {
+      const res = await fetch("/api/movements");
+      if (res.ok) {
+        const data: Movement[] = await res.json();
+        setMovements(data);
+      } else {
+        const errorData = await res.json();
         toast({
           title: "Erreur",
-          description: "Impossible de se connecter au serveur.",
+          description:
+            errorData.message || "Erreur lors du chargement des mouvements.",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchMovements();
+    } catch (error) {
+      console.error("Failed to fetch movements:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de se connecter au serveur.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, [toast]);
+
+  useEffect(() => {
+    fetchMovements();
+  }, [fetchMovements]);
 
   if (loading) {
     return (
@@ -124,7 +124,7 @@ export default function MovementsPage() {
         </CardContent>
       </Card>
 
-      <AddMovementModal>
+      <AddMovementModal onMovementAdded={fetchMovements}>
         <Button
           className="fixed bottom-8 right-8 rounded-full p-4 shadow-lg"
           size="icon"
