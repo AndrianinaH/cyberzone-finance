@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions, comparePassword, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { users } from "../../../../../drizzle/schema";
+import { users } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export async function PUT(req: Request) {
@@ -18,7 +18,10 @@ export async function PUT(req: Request) {
     const { currentPassword, newPassword } = body;
 
     if (!currentPassword || !newPassword) {
-      return new NextResponse("Le mot de passe actuel et le nouveau mot de passe sont requis", { status: 400 });
+      return new NextResponse(
+        "Le mot de passe actuel et le nouveau mot de passe sont requis",
+        { status: 400 },
+      );
     }
 
     const userId = session.user.id;

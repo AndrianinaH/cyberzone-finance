@@ -2,8 +2,7 @@ import bcrypt from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import NextAuth from "next-auth";
-import { users } from "../../drizzle/schema";
+import { users } from "@/drizzle/schema";
 
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 10;

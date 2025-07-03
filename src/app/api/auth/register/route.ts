@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { users } from "../../../../../drizzle/schema";
+import { users } from "@/drizzle/schema";
 
 export async function POST(request: Request) {
   try {
