@@ -8,7 +8,10 @@ export default function Header() {
   return (
     <header className="flex h-16 items-center justify-between px-4 md:px-6 border-b">
       <Link href="/" className="flex items-center gap-2 font-semibold">
-        <span className="text-lg">Cyberzone Finance</span>
+        <span className="text-lg text-rose-500">
+          Cyber<strong className="text-purple-950">zone</strong>
+        </span>
+        <span className="text-lg text-bleu-950">Vola</span>
       </Link>
       <nav className="hidden md:flex items-center gap-2 sm:gap-4">
         <Button variant="ghost" asChild>
