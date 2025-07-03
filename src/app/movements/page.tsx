@@ -209,10 +209,10 @@ export default function MovementsPage() {
 
       <AddMovementModal onMovementAdded={fetchMovements}>
         <Button
-          className="fixed bottom-8 right-8 rounded-full p-4 shadow-lg"
+          className="fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg p-0 flex items-center justify-center"
           size="icon"
         >
-          <Plus className="h-10 w-10" />
+          <Plus className="h-6 w-6" />
         </Button>
       </AddMovementModal>
 
