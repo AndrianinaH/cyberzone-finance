@@ -5,10 +5,21 @@ import { Home, ListChecks, User } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { MobileNav } from "./MobileNav";
 import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
 
 export default function Header() {
   const pathname = usePathname();
   const isAuthRoute = pathname.startsWith("/auth");
+  const { data: session, status } = useSession();
+  console.log("Session status:", status);
+  console.log("Session data:", session);
 
   return (
     <header className="flex h-16 items-center justify-between px-4 md:px-6 border-b">
@@ -32,12 +43,31 @@ export default function Header() {
               Mouvements
             </Link>
           </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/profile">
-              <User className="h-4 w-4 mr-2" />
-              Profil
-            </Link>
-          </Button>
+          {status === "authenticated" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost">
+                  <User className="h-4 w-4 mr-2" />
+                  Profil
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Voir Profil</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() =>
+                    signOut({
+                      callbackUrl: "/auth/login",
+                    })
+                  }
+                >
+                  Déconnexion
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <ThemeToggle />
         </nav>
       )}

@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { users } from "../../../../../drizzle/schema";
 import { eq } from "drizzle-orm";
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -67,6 +67,8 @@ const handler = NextAuth({
   pages: {
     signIn: "/auth/login",
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
