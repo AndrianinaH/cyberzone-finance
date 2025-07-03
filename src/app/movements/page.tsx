@@ -9,19 +9,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import { Movement } from "@/types";
 import { AddMovementModal } from "@/components/AddMovementModal";
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { EditMovementModal } from "@/components/EditMovementModal";
 
 export default function MovementsPage() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
+  const [selectedMovement, setSelectedMovement] = useState<Movement | null>(
+    null,
+  );
   const { toast } = useToast();
 
   const fetchMovements = useCallback(async () => {
@@ -29,7 +41,7 @@ export default function MovementsPage() {
       const res = await fetch("/api/movements");
       if (res.ok) {
         const data: Movement[] = await res.json();
-        setMovements(data);
+        setMovements([...data, ...data, ...data, ...data]);
       } else {
         const errorData = await res.json();
         toast({
@@ -77,7 +89,8 @@ export default function MovementsPage() {
         const errorData = await res.json();
         toast({
           title: "Erreur",
-          description: errorData.message || "Erreur lors de la suppression du mouvement.",
+          description:
+            errorData.message || "Erreur lors de la suppression du mouvement.",
           variant: "destructive",
         });
       }
@@ -148,25 +161,39 @@ export default function MovementsPage() {
                       </TableCell>
                       <TableCell>{movement.responsible}</TableCell>
                       <TableCell className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(movement)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(movement)}
+                        >
                           <Edit className="h-4 w-4" />
+                          Editer
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="destructive" size="sm">
                               <Trash2 className="h-4 w-4" />
+                              Supprimer
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Êtes-vous absolument sûr ?
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Cette action ne peut pas être annulée. Cela supprimera définitivement ce mouvement de nos serveurs.
+                                Cette action ne peut pas être annulée. Cela
+                                supprimera définitivement ce mouvement de nos
+                                serveurs.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Annuler</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(movement.id)}>Continuer</AlertDialogAction>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(movement.id)}
+                              >
+                                Continuer
+                              </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -185,7 +212,7 @@ export default function MovementsPage() {
           className="fixed bottom-8 right-8 rounded-full p-4 shadow-lg"
           size="icon"
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-10 w-10" />
         </Button>
       </AddMovementModal>
 
