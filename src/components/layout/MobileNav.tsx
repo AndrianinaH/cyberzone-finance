@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, Home, ListChecks, User } from "lucide-react";
+import { Menu, Home, ListChecks, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -11,11 +11,13 @@ import {
 } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const isAuthRoute = pathname.startsWith("/auth");
+  const { status } = useSession();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -53,6 +55,18 @@ export function MobileNav() {
               <User className="h-5 w-5" />
               Profil
             </Link>
+            {status === "authenticated" && (
+              <button
+                onClick={() => {
+                  signOut({ callbackUrl: "/auth/login" });
+                  setOpen(false);
+                }}
+                className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-red-600 hover:text-red-500"
+              >
+                <LogOut className="h-5 w-5" />
+                Déconnexion
+              </button>
+            )}
           </nav>
         )}
         <div className="mt-4 flex items-center gap-4 mx-[-0.65rem] px-3 py-2">
