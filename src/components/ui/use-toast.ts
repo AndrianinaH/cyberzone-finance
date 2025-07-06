@@ -5,7 +5,11 @@ import { ToastProps } from "./toast";
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 5000;
 
-type ToasterToast = ToastProps & { id: string; description?: string };
+type ToasterToast = ToastProps & {
+  id: string;
+  description?: string;
+  action?: React.ReactNode;
+};
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
