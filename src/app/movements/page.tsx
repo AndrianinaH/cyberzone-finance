@@ -9,6 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Trash2, Edit } from "lucide-react";
 import { Movement } from "@/types";
 import { AddMovementModal } from "@/components/AddMovementModal";
@@ -36,13 +43,20 @@ export default function MovementsPage() {
     null,
   );
   const { toast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalMovements, setTotalMovements] = useState(0);
 
   const fetchMovements = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch("/api/movements");
+      const res = await fetch(
+        `/api/movements?page=${currentPage}&limit=${itemsPerPage}`,
+      );
       if (res.ok) {
-        const data: Movement[] = await res.json();
-        setMovements([...data]);
+        const { movements: data, totalMovements: total } = await res.json();
+        setMovements(data);
+        setTotalMovements(total);
       } else {
         const errorData = await res.json();
         toast({
@@ -62,7 +76,7 @@ export default function MovementsPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, currentPage, itemsPerPage]);
 
   useEffect(() => {
     fetchMovements();
@@ -204,6 +218,49 @@ export default function MovementsPage() {
                 )}
               </TableBody>
             </Table>
+          </div>
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Précédent
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage * itemsPerPage >= totalMovements}
+              >
+                Suivant
+              </Button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">
+                Page {currentPage} sur{" "}
+                {Math.ceil(totalMovements / itemsPerPage)}
+              </span>
+              <Select
+                value={String(itemsPerPage)}
+                onValueChange={(value) => {
+                  setItemsPerPage(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 lignes</SelectItem>
+                  <SelectItem value="25">25 lignes</SelectItem>
+                  <SelectItem value="50">50 lignes</SelectItem>
+                  <SelectItem value="100">100 lignes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>

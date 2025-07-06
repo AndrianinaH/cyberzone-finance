@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { movements } from "@/drizzle/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, count } from "drizzle-orm";
 import { DEFAULT_EXCHANGE_RATES, calculateAmountMGA } from "@/lib/currency";
 
 export async function GET(req: Request) {
@@ -15,12 +15,26 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const offset = (page - 1) * limit;
+
     const userMovements = await db
       .select()
       .from(movements)
-      .orderBy(desc(movements.id));
+      .orderBy(desc(movements.id))
+      .limit(limit)
+      .offset(offset);
 
-    return NextResponse.json(userMovements);
+    const totalMovements = await db
+      .select({ value: count() })
+      .from(movements);
+
+    return NextResponse.json({
+      movements: userMovements,
+      totalMovements: totalMovements[0].value,
+    });
   } catch (error) {
     console.error("Error fetching movements:", error);
     return NextResponse.json(
