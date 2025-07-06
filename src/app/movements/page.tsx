@@ -210,6 +210,15 @@ export default function MovementsPage() {
                     <Button
                       variant="ghost"
                       onClick={() => {
+                        setDateRange(undefined);
+                        setDatePickerOpen(false);
+                      }}
+                    >
+                      Effacer
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
                         const today = new Date();
                         setDateRange({ from: today, to: today });
                         setDatePickerOpen(false);
