@@ -26,6 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { EditMovementModal } from "@/components/EditMovementModal";
+import { formatNumber } from "@/lib/utils";
 
 export default function MovementsPage() {
   const [movements, setMovements] = useState<Movement[]>([]);
@@ -153,7 +154,7 @@ export default function MovementsPage() {
                         {movement.type === "entry" ? "Entrée" : "Sortie"}
                       </TableCell>
                       <TableCell>
-                        {movement.amountMGA.toLocaleString()} MGA
+                        {formatNumber(movement.amountMGA)} MGA
                       </TableCell>
                       <TableCell>{movement.description}</TableCell>
                       <TableCell>
