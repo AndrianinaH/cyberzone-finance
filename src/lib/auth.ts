@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { users } from "@/drizzle/schema";
+import { AuthOptions } from "next-auth";
 
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 10;
@@ -16,7 +17,7 @@ export const comparePassword = async (
   return bcrypt.compare(password, hash);
 };
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -68,7 +69,7 @@ export const authOptions = {
       // Fetch the latest user data from the database
       if (token.id) {
         const dbUser = await db.query.users.findFirst({
-          where: eq(users.id, token.id as string),
+          where: eq(users.id, Number(token.id)),
         });
         if (dbUser) {
           token.name = dbUser.name;
