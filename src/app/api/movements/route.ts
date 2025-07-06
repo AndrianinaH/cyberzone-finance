@@ -116,7 +116,7 @@ export async function POST(req: Request) {
     const amountMGA = calculateAmountMGA(amount, currency, finalExchangeRate);
 
     await db.insert(movements).values({
-      userId: userId,
+      userId: Number(userId),
       type: type,
       amount: amount.toString(), // Drizzle stores numeric as string
       currency: currency,
@@ -246,7 +246,12 @@ export async function DELETE(req: Request) {
 
     await db
       .delete(movements)
-      .where(and(eq(movements.id, parseInt(id)), eq(movements.userId, userId)));
+      .where(
+        and(
+          eq(movements.id, parseInt(id)),
+          eq(movements.userId, Number(userId)),
+        ),
+      );
 
     return NextResponse.json(
       { message: "Mouvement supprimé avec succès" },
