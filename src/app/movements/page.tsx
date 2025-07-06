@@ -149,15 +149,16 @@ export default function MovementsPage() {
           <CardTitle>Mouvements Récents</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-center items-center space-x-4 mb-4">
+          <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 mb-4">
             <Input
               placeholder="Rechercher"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
+              className="w-full md:max-w-sm"
+              autoFocus
             />
             <Select value={searchType} onValueChange={setSearchType}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="Type de mouvement" />
               </SelectTrigger>
               <SelectContent>
