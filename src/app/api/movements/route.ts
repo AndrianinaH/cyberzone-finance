@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { movements } from "@/drizzle/schema";
-import { and, desc, eq, count, ilike, or } from "drizzle-orm";
+import { and, desc, eq, count, ilike, or, sql } from "drizzle-orm";
 import { DEFAULT_EXCHANGE_RATES, calculateAmountMGA } from "@/lib/currency";
 
 export async function GET(req: Request) {
@@ -24,12 +24,17 @@ export async function GET(req: Request) {
 
     const whereClauses = [];
     if (searchTerm) {
-      whereClauses.push(
-        or(
-          ilike(movements.description, `%${searchTerm}%`),
-          ilike(movements.responsible, `%${searchTerm}%`),
-        ),
-      );
+      const isNumeric = !isNaN(parseFloat(searchTerm)) && isFinite(Number(searchTerm));
+      if (isNumeric) {
+        whereClauses.push(ilike(sql`${movements.amountMGA}::text`, `%${searchTerm}%`));
+      } else {
+        whereClauses.push(
+          or(
+            ilike(movements.description, `%${searchTerm}%`),
+            ilike(movements.responsible, `%${searchTerm}%`),
+          ),
+        );
+      }
     }
     if (type && type !== "all") {
       whereClauses.push(eq(movements.type, type));
