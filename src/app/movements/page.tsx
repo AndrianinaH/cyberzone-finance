@@ -1,4 +1,5 @@
 "use client";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -46,13 +47,19 @@ export default function MovementsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalMovements, setTotalMovements] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState("");
 
   const fetchMovements = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/movements?page=${currentPage}&limit=${itemsPerPage}`,
-      );
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        limit: String(itemsPerPage),
+        q: searchTerm, // Use description to pass the search term
+        type: searchType,
+      });
+      const res = await fetch(`/api/movements?${params.toString()}`);
       if (res.ok) {
         const { movements: data, totalMovements: total } = await res.json();
         setMovements(data);
@@ -76,10 +83,16 @@ export default function MovementsPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast, currentPage, itemsPerPage]);
+  }, [toast, currentPage, itemsPerPage, searchTerm, searchType]);
 
   useEffect(() => {
-    fetchMovements();
+    // debounce to avoid fetching for each char typed by the user
+    const handler = setTimeout(() => {
+      fetchMovements();
+    }, 500);
+    return () => {
+      clearTimeout(handler);
+    };
   }, [fetchMovements]);
 
   const handleEdit = (movement: Movement) => {
@@ -136,6 +149,24 @@ export default function MovementsPage() {
           <CardTitle>Mouvements Récents</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="flex justify-center items-center space-x-4 mb-4">
+            <Input
+              placeholder="Rechercher"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-sm"
+            />
+            <Select value={searchType} onValueChange={setSearchType}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Type de mouvement" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les types</SelectItem>
+                <SelectItem value="entry">Entrée</SelectItem>
+                <SelectItem value="exit">Sortie</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>

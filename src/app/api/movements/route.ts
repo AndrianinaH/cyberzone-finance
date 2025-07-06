@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { movements } from "@/drizzle/schema";
-import { and, desc, eq, count } from "drizzle-orm";
+import { and, desc, eq, count, ilike, or } from "drizzle-orm";
 import { DEFAULT_EXCHANGE_RATES, calculateAmountMGA } from "@/lib/currency";
 
 export async function GET(req: Request) {
@@ -19,17 +19,34 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "10", 10);
     const offset = (page - 1) * limit;
+    const searchTerm = searchParams.get("q") || ""; // description contains the search term
+    const type = searchParams.get("type") || "";
+
+    const whereClauses = [];
+    if (searchTerm) {
+      whereClauses.push(
+        or(
+          ilike(movements.description, `%${searchTerm}%`),
+          ilike(movements.responsible, `%${searchTerm}%`),
+        ),
+      );
+    }
+    if (type && type !== "all") {
+      whereClauses.push(eq(movements.type, type));
+    }
 
     const userMovements = await db
       .select()
       .from(movements)
+      .where(and(...whereClauses))
       .orderBy(desc(movements.id))
       .limit(limit)
       .offset(offset);
 
     const totalMovements = await db
       .select({ value: count() })
-      .from(movements);
+      .from(movements)
+      .where(and(...whereClauses));
 
     return NextResponse.json({
       movements: userMovements,
