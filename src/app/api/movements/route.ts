@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { movements } from "@/drizzle/schema";
-import { and, desc, eq, count, ilike, or, sql } from "drizzle-orm";
+import { and, desc, eq, count, ilike, or, sql, gte, lte } from "drizzle-orm";
 import { DEFAULT_EXCHANGE_RATES, calculateAmountMGA } from "@/lib/currency";
 
 export async function GET(req: Request) {
@@ -21,6 +21,8 @@ export async function GET(req: Request) {
     const offset = (page - 1) * limit;
     const searchTerm = searchParams.get("q") || ""; // description contains the search term
     const type = searchParams.get("type") || "";
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
 
     const whereClauses = [];
     if (searchTerm) {
@@ -38,6 +40,12 @@ export async function GET(req: Request) {
     }
     if (type && type !== "all") {
       whereClauses.push(eq(movements.type, type));
+    }
+    if (startDate) {
+      whereClauses.push(gte(movements.date, new Date(startDate)));
+    }
+    if (endDate) {
+      whereClauses.push(lte(movements.date, new Date(endDate)));
     }
 
     const userMovements = await db

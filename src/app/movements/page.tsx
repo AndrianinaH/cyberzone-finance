@@ -21,6 +21,23 @@ import { Plus, Trash2, Edit } from "lucide-react";
 import { Movement } from "@/types";
 import { AddMovementModal } from "@/components/AddMovementModal";
 import { useState, useEffect, useCallback } from "react";
+import { CalendarIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  subDays,
+} from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import {
   AlertDialog,
@@ -49,6 +66,10 @@ export default function MovementsPage() {
   const [totalMovements, setTotalMovements] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("");
+  const [dateRange, setDateRange] = useState<
+    { from?: Date; to?: Date } | undefined
+  >(undefined);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const fetchMovements = useCallback(async () => {
     setLoading(true);
@@ -58,6 +79,8 @@ export default function MovementsPage() {
         limit: String(itemsPerPage),
         q: searchTerm, // Use description to pass the search term
         type: searchType,
+        ...(dateRange?.from && { startDate: dateRange.from.toISOString() }),
+        ...(dateRange?.to && { endDate: dateRange.to.toISOString() }),
       });
       const res = await fetch(`/api/movements?${params.toString()}`);
       if (res.ok) {
@@ -83,7 +106,7 @@ export default function MovementsPage() {
     } finally {
       setLoading(false);
     }
-  }, [toast, currentPage, itemsPerPage, searchTerm, searchType]);
+  }, [toast, currentPage, itemsPerPage, searchTerm, searchType, dateRange]);
 
   useEffect(() => {
     // debounce to avoid fetching for each char typed by the user
@@ -157,6 +180,92 @@ export default function MovementsPage() {
               className="w-full md:max-w-sm"
               autoFocus
             />
+            <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full md:w-[280px] justify-start text-left font-normal",
+                    !dateRange && "text-muted-foreground",
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y", { locale: fr })} -{" "}
+                        {format(dateRange.to, "LLL dd, y", { locale: fr })}
+                      </>
+                    ) : (
+                      format(dateRange.from, "LLL dd, y", { locale: fr })
+                    )
+                  ) : (
+                    <span>Sélectionner une date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <div className="flex flex-col space-y-2 p-2">
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const today = new Date();
+                        setDateRange({ from: today, to: today });
+                        setDatePickerOpen(false);
+                      }}
+                    >
+                      Aujourd'hui
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const today = new Date();
+                        setDateRange({ from: subDays(today, 6), to: today });
+                        setDatePickerOpen(false);
+                      }}
+                    >
+                      7 derniers jours
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const today = new Date();
+                        setDateRange({
+                          from: startOfMonth(today),
+                          to: endOfMonth(today),
+                        });
+                        setDatePickerOpen(false);
+                      }}
+                    >
+                      Ce mois
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const today = new Date();
+                        setDateRange({
+                          from: startOfYear(today),
+                          to: endOfYear(today),
+                        });
+                        setDatePickerOpen(false);
+                      }}
+                    >
+                      Cette année
+                    </Button>
+                  </div>
+                  <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={dateRange?.from}
+                    selected={dateRange}
+                    onSelect={setDateRange}
+                    numberOfMonths={2}
+                    locale={fr}
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
             <Select value={searchType} onValueChange={setSearchType}>
               <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="Type de mouvement" />
