@@ -7,8 +7,7 @@ import { eq } from "drizzle-orm";
 
 export async function PUT(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
       return new NextResponse("Non autorisé", { status: 401 });
@@ -31,7 +30,7 @@ export async function PUT(req: Request) {
       .execute();
     if (
       existingUserWithEmail.length > 0 &&
-      existingUserWithEmail[0].id !== userId
+      String(existingUserWithEmail[0].id) !== String(userId)
     ) {
       return new NextResponse("Cet email est déjà utilisé", { status: 409 });
     }
@@ -42,7 +41,7 @@ export async function PUT(req: Request) {
         name: name,
         email: email,
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, Number(userId)));
 
     return NextResponse.json({ message: "Profile updated successfully" });
   } catch (error) {

@@ -7,8 +7,7 @@ import { eq } from "drizzle-orm";
 
 export async function PUT(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
       return new NextResponse("Non autorisé", { status: 401 });
@@ -27,7 +26,7 @@ export async function PUT(req: Request) {
     const userId = session.user.id;
 
     const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
+      where: eq(users.id, Number(userId)),
     });
 
     if (!user) {
@@ -47,7 +46,7 @@ export async function PUT(req: Request) {
       .set({
         password: hashedNewPassword,
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.id, Number(userId)));
 
     return NextResponse.json({ message: "Password updated successfully" });
   } catch (error) {

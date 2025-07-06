@@ -4,10 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { users } from "@/drizzle/schema";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
       return new NextResponse("Non autorisé", { status: 401 });

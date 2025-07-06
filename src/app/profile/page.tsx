@@ -45,8 +45,9 @@ export default function ProfilePage() {
           variant: "success",
         });
       } else {
-        let errorMessage = "Une erreur est survenue lors de la mise à jour du profil.";
-        if (res.headers.get('content-type')?.includes('application/json')) {
+        let errorMessage =
+          "Une erreur est survenue lors de la mise à jour du profil.";
+        if (res.headers.get("content-type")?.includes("application/json")) {
           const errorData = await res.json();
           errorMessage = errorData.message || errorMessage;
         } else {
@@ -98,8 +99,9 @@ export default function ProfilePage() {
         setNewPassword("");
         setConfirmNewPassword("");
       } else {
-        let errorMessage = "Une erreur est survenue lors de la mise à jour du mot de passe.";
-        if (res.headers.get('content-type')?.includes('application/json')) {
+        let errorMessage =
+          "Une erreur est survenue lors de la mise à jour du mot de passe.";
+        if (res.headers.get("content-type")?.includes("application/json")) {
           const errorData = await res.json();
           errorMessage = errorData.message || errorMessage;
         } else {
@@ -138,8 +140,13 @@ export default function ProfilePage() {
             <CardContent>
               <form className="space-y-4" onSubmit={handleProfileSubmit}>
                 <div className="space-y-2">
-                  <Label htmlFor="username">Nom d'utilisateur</Label>
-                  <Input id="username" type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+                  <Label htmlFor="username">{`Nom d'utilisateur`}</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -164,15 +171,32 @@ export default function ProfilePage() {
               <form className="space-y-4" onSubmit={handlePasswordSubmit}>
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">Mot de passe actuel</Label>
-                  <Input id="currentPassword" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="newPassword">Nouveau mot de passe</Label>
-                  <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmNewPassword">Confirmer le nouveau mot de passe</Label>
-                  <Input id="confirmNewPassword" type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} />
+                  <Label htmlFor="confirmNewPassword">
+                    Confirmer le nouveau mot de passe
+                  </Label>
+                  <Input
+                    id="confirmNewPassword"
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  />
                 </div>
                 <Button type="submit">Changer le mot de passe</Button>
               </form>

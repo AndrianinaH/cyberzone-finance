@@ -224,7 +224,7 @@ export default function MovementsPage() {
                         setDatePickerOpen(false);
                       }}
                     >
-                      Aujourd'hui
+                      {`Aujourd'hui`}
                     </Button>
                     <Button
                       variant="ghost"
@@ -267,7 +267,8 @@ export default function MovementsPage() {
                     initialFocus
                     mode="range"
                     defaultMonth={dateRange?.from}
-                    selected={dateRange}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    selected={dateRange as any}
                     onSelect={setDateRange}
                     numberOfMonths={2}
                     locale={fr}

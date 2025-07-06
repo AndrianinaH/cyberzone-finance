@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

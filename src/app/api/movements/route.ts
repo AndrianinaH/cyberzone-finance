@@ -8,8 +8,7 @@ import { DEFAULT_EXCHANGE_RATES, calculateAmountMGA } from "@/lib/currency";
 
 export async function GET(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
@@ -26,9 +25,12 @@ export async function GET(req: Request) {
 
     const whereClauses = [];
     if (searchTerm) {
-      const isNumeric = !isNaN(parseFloat(searchTerm)) && isFinite(Number(searchTerm));
+      const isNumeric =
+        !isNaN(parseFloat(searchTerm)) && isFinite(Number(searchTerm));
       if (isNumeric) {
-        whereClauses.push(ilike(sql`${movements.amountMGA}::text`, `%${searchTerm}%`));
+        whereClauses.push(
+          ilike(sql`${movements.amountMGA}::text`, `%${searchTerm}%`),
+        );
       } else {
         whereClauses.push(
           or(
@@ -38,8 +40,8 @@ export async function GET(req: Request) {
         );
       }
     }
-    if (type && type !== "all") {
-      whereClauses.push(eq(movements.type, type));
+    if (type && type !== "all" && (type === "entry" || type === "exit")) {
+      whereClauses.push(eq(movements.type, type as "entry" | "exit"));
     }
     if (startDate) {
       whereClauses.push(gte(movements.date, new Date(startDate)));
@@ -76,8 +78,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
@@ -144,8 +145,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
@@ -204,7 +204,12 @@ export async function PUT(req: Request) {
         date: new Date(date),
         responsible,
       })
-      .where(and(eq(movements.id, parseInt(id)), eq(movements.userId, userId)));
+      .where(
+        and(
+          eq(movements.id, parseInt(id)),
+          eq(movements.userId, Number(userId)),
+        ),
+      );
 
     return NextResponse.json(
       { message: "Mouvement mis à jour avec succès" },
@@ -221,8 +226,7 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
