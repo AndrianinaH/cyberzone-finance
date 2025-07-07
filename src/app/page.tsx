@@ -1,11 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getBalance, getDailyMovements } from "@/lib/dashboard";
+import { getBalance, getDailyMovements, getChartData } from "@/lib/dashboard";
+import DailyBalanceChart from "@/components/DailyBalanceChart";
 
 export default async function Home() {
   const balance = await getBalance();
   const dailyMovements = await getDailyMovements();
+  const chartData = await getChartData();
 
   return (
     <div className="flex min-h-screen flex-col p-4 sm:p-8">
@@ -81,11 +83,7 @@ export default async function Home() {
             <CardTitle>Graphique des 7 derniers jours</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex h-64 w-full items-center justify-center rounded-md bg-gray-200 dark:bg-gray-700">
-              <p className="text-gray-500 dark:text-gray-400">
-                Placeholder pour le graphique
-              </p>
-            </div>
+            <DailyBalanceChart data={chartData} />
           </CardContent>
         </Card>
       </div>

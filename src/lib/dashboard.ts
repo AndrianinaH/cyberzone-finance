@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { movements } from "@/drizzle/schema";
 import { gte } from "drizzle-orm";
+import { format, subDays } from "date-fns";
 
 export async function getBalance() {
   const allMovements = await db.select().from(movements);
@@ -60,4 +61,47 @@ export async function getDailyMovements() {
   );
 
   return dailyTotals;
+}
+
+export async function getChartData() {
+  const sevenDaysAgo = subDays(new Date(), 7);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+
+  const recentMovements = await db
+    .select()
+    .from(movements)
+    .where(gte(movements.date, sevenDaysAgo));
+
+  const dailyData: { [key: string]: { mga: number; rmb: number } } = {};
+
+  for (let i = 0; i < 7; i++) {
+    const date = subDays(new Date(), i);
+    dailyData[format(date, "yyyy-MM-dd")] = { mga: 0, rmb: 0 };
+  }
+
+  recentMovements.forEach((movement) => {
+    const dateKey = format(movement.date, "yyyy-MM-dd");
+    const amount = parseFloat(movement.amount);
+    const mgaAmount = parseFloat(movement.amountMGA);
+    const value = movement.type === "entry" ? amount : -amount;
+    const mgaValue = movement.type === "entry" ? mgaAmount : -mgaAmount;
+
+    if (dailyData[dateKey]) {
+      if (movement.currency === "RMB") {
+        dailyData[dateKey].rmb += value;
+      } else {
+        dailyData[dateKey].mga += mgaValue;
+      }
+    }
+  });
+
+  const chartData = Object.keys(dailyData)
+    .sort()
+    .map((date) => ({
+      date: format(new Date(date), "dd/MM"),
+      mga: dailyData[date].mga,
+      rmb: dailyData[date].rmb,
+    }));
+
+  return chartData;
 }
