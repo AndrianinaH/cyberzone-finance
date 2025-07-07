@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { movements } from "@/drizzle/schema";
-import { gte } from "drizzle-orm";
+import { gte, sum } from "drizzle-orm";
 import { format, subDays } from "date-fns";
 
 export async function getBalance() {
@@ -104,4 +104,19 @@ export async function getChartData() {
     }));
 
   return chartData;
+}
+
+export async function getResponsibleMGAData() {
+  const data = await db
+    .select({
+      responsible: movements.responsible,
+      totalMGA: sum(movements.amountMGA),
+    })
+    .from(movements)
+    .groupBy(movements.responsible);
+
+  return data.map(item => ({
+    responsible: item.responsible,
+    totalMGA: parseFloat(item.totalMGA || '0'),
+  }));
 }

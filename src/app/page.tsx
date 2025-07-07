@@ -1,13 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, ArrowUp, ArrowDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { getBalance, getDailyMovements, getChartData } from "@/lib/dashboard";
+import {
+  getBalance,
+  getDailyMovements,
+  getChartData,
+  getResponsibleMGAData,
+} from "@/lib/dashboard";
 import DailyBalanceChart from "@/components/DailyBalanceChart";
+import ResponsibleMGAChart from "@/components/ResponsibleMGAChart";
 
 export default async function Home() {
   const balance = await getBalance();
   const dailyMovements = await getDailyMovements();
   const chartData = await getChartData();
+  const responsibleMGAData = await getResponsibleMGAData();
 
   return (
     <div className="flex min-h-screen flex-col p-4 sm:p-8">
@@ -87,19 +93,13 @@ export default async function Home() {
           </CardContent>
         </Card>
       </div>
-
       <div className="mt-8">
         <Card>
           <CardHeader>
-            <CardTitle>Toggle Période</CardTitle>
+            <CardTitle>Total MGA par Actionnaire</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex space-x-2">
-              <Button variant="outline">Jour</Button>
-              <Button variant="outline">Semaine</Button>
-              <Button variant="outline">Mois</Button>
-              <Button variant="outline">Année</Button>
-            </div>
+            <ResponsibleMGAChart data={responsibleMGAData} />
           </CardContent>
         </Card>
       </div>
