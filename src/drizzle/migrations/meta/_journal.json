@@ -1,26 +1,12 @@
 {
   "version": "7",
-  "dialect": "postgresql",
+  "dialect": "mysql",
   "entries": [
     {
       "idx": 0,
-      "version": "7",
-      "when": 1751549190816,
-      "tag": "0000_create_table_users",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1751554989984,
-      "tag": "0001_add_users_name",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1751568054007,
-      "tag": "0002_create_table_movements",
+      "version": "5",
+      "when": 1751889851273,
+      "tag": "0000_init_all",
       "breakpoints": true
     }
   ]
