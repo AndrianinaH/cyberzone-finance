@@ -33,10 +33,10 @@ const DailyBalanceChart: React.FC<DailyBalanceChartProps> = ({ data }) => {
           bottom: 5,
         }}
       >
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
+        <XAxis dataKey="date" style={{ fontFamily: "Inter, sans-serif", fontSize: "12px" }} />
+        <YAxis style={{ fontFamily: "Inter, sans-serif", fontSize: "12px" }} />
+        <Tooltip contentStyle={{ fontFamily: "Inter, sans-serif", fontSize: "12px" }} />
+        <Legend wrapperStyle={{ fontFamily: "Inter, sans-serif", fontSize: "12px" }} />
         <Line
           type="monotone"
           dataKey="mga"
