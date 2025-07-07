@@ -312,8 +312,8 @@ export default function MovementsPage() {
                       <TableCell
                         className={
                           movement.type === "entry"
-                            ? "text-green-500"
-                            : "text-red-500"
+                            ? "text-green-600"
+                            : "text-red-600"
                         }
                       >
                         {movement.type === "entry" ? "Entrée" : "Sortie"}
