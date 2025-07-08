@@ -97,7 +97,7 @@ const DailyBalanceChart: React.FC<DailyBalanceChartProps> = ({ data }) => {
     <div className="w-full">
       {/* En-tête du graphique */}
       <div className="mb-4 px-1">
-        <div className="flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-4 sm:gap-6 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-blue-500 rounded-full" />
             <span className="text-gray-600 dark:text-gray-400">MGA</span>
@@ -109,109 +109,118 @@ const DailyBalanceChart: React.FC<DailyBalanceChartProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Conteneur du graphique */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart
-            data={data}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 20,
-            }}
-          >
-            {/* Grille de fond */}
-            <CartesianGrid
-              strokeDasharray="3 3"
-              className="stroke-gray-200 dark:stroke-gray-700"
-              strokeOpacity={0.6}
-            />
+      {/* Conteneur du graphique avec scroll horizontal sur mobile */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-x-auto">
+        <div className="p-3 sm:p-5 min-w-[600px] sm:min-w-0">
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart
+              data={data}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 20,
+              }}
+            >
+              {/* Grille de fond */}
+              <CartesianGrid
+                strokeDasharray="3 3"
+                className="stroke-gray-200 dark:stroke-gray-700"
+                strokeOpacity={0.6}
+              />
 
-            {/* Axe X */}
-            <XAxis
-              dataKey="date"
-              tickFormatter={formatDate}
-              tick={{
-                fontSize: 12,
-                fill: "currentColor",
-                fontFamily: "Inter, sans-serif",
-              }}
-              className="text-gray-600 dark:text-gray-400"
-              axisLine={{ stroke: "currentColor" }}
-              tickLine={{ stroke: "currentColor" }}
-            />
+              {/* Axe X */}
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatDate}
+                tick={{
+                  fontSize: 12,
+                  fill: "currentColor",
+                  fontFamily: "Inter, sans-serif",
+                }}
+                className="text-gray-600 dark:text-gray-400"
+                axisLine={{ stroke: "currentColor" }}
+                tickLine={{ stroke: "currentColor" }}
+              />
 
-            {/* Axe Y */}
-            <YAxis
-              tickFormatter={formatValue}
-              tick={{
-                fontSize: 12,
-                fill: "currentColor",
-                fontFamily: "Inter, sans-serif",
-              }}
-              className="text-gray-600 dark:text-gray-400"
-              axisLine={{ stroke: "currentColor" }}
-              tickLine={{ stroke: "currentColor" }}
-            />
+              {/* Axe Y */}
+              <YAxis
+                tickFormatter={formatValue}
+                tick={{
+                  fontSize: 12,
+                  fill: "currentColor",
+                  fontFamily: "Inter, sans-serif",
+                }}
+                className="text-gray-600 dark:text-gray-400"
+                axisLine={{ stroke: "currentColor" }}
+                tickLine={{ stroke: "currentColor" }}
+              />
 
-            {/* Tooltip personnalisé */}
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{
-                stroke: "currentColor",
-                strokeWidth: 1,
-                strokeDasharray: "5 5",
-                className: "text-gray-400 dark:text-gray-500",
-              }}
-            />
+              {/* Tooltip personnalisé */}
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{
+                  stroke: "currentColor",
+                  strokeWidth: 1,
+                  strokeDasharray: "5 5",
+                  className: "text-gray-400 dark:text-gray-500",
+                }}
+              />
 
-            {/* Légende cachée car remplacée par l'en-tête */}
-            <Legend wrapperStyle={{ display: "none" }} />
+              {/* Légende cachée car remplacée par l'en-tête */}
+              <Legend wrapperStyle={{ display: "none" }} />
 
-            {/* Ligne MGA */}
-            <Line
-              type="monotone"
-              dataKey="mga"
-              stroke="#3b82f6"
-              strokeWidth={3}
-              dot={{
-                fill: "#3b82f6",
-                strokeWidth: 2,
-                stroke: "#ffffff",
-                r: 4,
-              }}
-              activeDot={{
-                r: 6,
-                fill: "#3b82f6",
-                stroke: "#ffffff",
-                strokeWidth: 2,
-              }}
-              name="MGA"
-            />
+              {/* Ligne MGA */}
+              <Line
+                type="monotone"
+                dataKey="mga"
+                stroke="#3b82f6"
+                strokeWidth={3}
+                dot={{
+                  fill: "#3b82f6",
+                  strokeWidth: 2,
+                  stroke: "#ffffff",
+                  r: 4,
+                }}
+                activeDot={{
+                  r: 6,
+                  fill: "#3b82f6",
+                  stroke: "#ffffff",
+                  strokeWidth: 2,
+                }}
+                name="MGA"
+              />
 
-            {/* Ligne RMB */}
-            <Line
-              type="monotone"
-              dataKey="rmb"
-              stroke="#10b981"
-              strokeWidth={3}
-              dot={{
-                fill: "#10b981",
-                strokeWidth: 2,
-                stroke: "#ffffff",
-                r: 4,
-              }}
-              activeDot={{
-                r: 6,
-                fill: "#10b981",
-                stroke: "#ffffff",
-                strokeWidth: 2,
-              }}
-              name="RMB"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+              {/* Ligne RMB */}
+              <Line
+                type="monotone"
+                dataKey="rmb"
+                stroke="#10b981"
+                strokeWidth={3}
+                dot={{
+                  fill: "#10b981",
+                  strokeWidth: 2,
+                  stroke: "#ffffff",
+                  r: 4,
+                }}
+                activeDot={{
+                  r: 6,
+                  fill: "#10b981",
+                  stroke: "#ffffff",
+                  strokeWidth: 2,
+                }}
+                name="RMB"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Indicateur de scroll sur mobile */}
+      <div className="sm:hidden mt-2 text-center">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          ← Faites défiler horizontalement pour voir tout le graphique →
+        </p>
       </div>
     </div>
   );
