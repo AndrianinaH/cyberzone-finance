@@ -71,7 +71,6 @@ export function MobileNav() {
         )}
         <div className="mt-4 flex items-center gap-4 mx-[-0.65rem] px-3 py-2">
           <ThemeToggle />
-          <span className="text-muted-foreground">Theme</span>
         </div>
       </SheetContent>
     </Sheet>
