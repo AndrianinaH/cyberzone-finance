@@ -1,14 +1,31 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import * as React from "react";
@@ -22,7 +39,10 @@ interface AddMovementModalProps {
   onMovementAdded: () => void;
 }
 
-export function AddMovementModal({ children, onMovementAdded }: AddMovementModalProps) {
+export function AddMovementModal({
+  children,
+  onMovementAdded,
+}: AddMovementModalProps) {
   const { data: session } = useSession();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -34,7 +54,10 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
   const [exchangeRate, setExchangeRate] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [responsible, setResponsible] = useState<string>("");
-  const [usersList, setUsersList] = useState<{ id: string; name: string }[]>([]);
+  const [isSale, setIsSale] = useState<boolean>(false);
+  const [usersList, setUsersList] = useState<{ id: string; name: string }[]>(
+    [],
+  );
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -54,7 +77,8 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
         console.error("Failed to fetch users:", error);
         toast({
           title: "Erreur",
-          description: "Impossible de se connecter au serveur pour les utilisateurs.",
+          description:
+            "Impossible de se connecter au serveur pour les utilisateurs.",
           variant: "destructive",
         });
       }
@@ -78,11 +102,14 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
       type: movementType,
       amount: parseFloat(amount),
       currency,
-      exchangeRate: exchangeRate ? parseFloat(exchangeRate) : DEFAULT_EXCHANGE_RATES[currency],
+      exchangeRate: exchangeRate
+        ? parseFloat(exchangeRate)
+        : DEFAULT_EXCHANGE_RATES[currency],
       description,
       date: date?.toISOString(),
       author: session.user.name,
       responsible,
+      isSale,
     };
 
     try {
@@ -107,13 +134,15 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
         setExchangeRate("");
         setDescription("");
         setResponsible("");
+        setIsSale(false);
         setDate(new Date());
         onMovementAdded(); // Notify parent to refresh
       } else {
         const errorData = await res.json();
         toast({
           title: "Erreur",
-          description: errorData.message || "Erreur lors de l'ajout du mouvement.",
+          description:
+            errorData.message || "Erreur lors de l'ajout du mouvement.",
           variant: "destructive",
         });
       }
@@ -142,13 +171,23 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
             <ToggleGroup
               type="single"
               value={movementType}
-              onValueChange={(value: "entry" | "exit") => setMovementType(value)}
+              onValueChange={(value: "entry" | "exit") =>
+                setMovementType(value)
+              }
               className="col-span-3"
             >
-              <ToggleGroupItem value="entry" aria-label="Toggle entry" className="flex-1 data-[state=on]:bg-green-500 data-[state=on]:text-white">
+              <ToggleGroupItem
+                value="entry"
+                aria-label="Toggle entry"
+                className="flex-1 data-[state=on]:bg-green-500 data-[state=on]:text-white"
+              >
                 Entrée
               </ToggleGroupItem>
-              <ToggleGroupItem value="exit" aria-label="Toggle exit" className="flex-1 data-[state=on]:bg-red-500 data-[state=on]:text-white">
+              <ToggleGroupItem
+                value="exit"
+                aria-label="Toggle exit"
+                className="flex-1 data-[state=on]:bg-red-500 data-[state=on]:text-white"
+              >
                 Sortie
               </ToggleGroupItem>
             </ToggleGroup>
@@ -157,13 +196,24 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
             <Label htmlFor="amount" className="text-right">
               Montant
             </Label>
-            <Input id="amount" type="number" placeholder="0.00" className="col-span-3" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <Input
+              id="amount"
+              type="number"
+              placeholder="0.00"
+              className="col-span-3"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="currency" className="text-right">
               Devise
             </Label>
-            <Select defaultValue="MGA" value={currency} onValueChange={setCurrency}>
+            <Select
+              defaultValue="MGA"
+              value={currency}
+              onValueChange={setCurrency}
+            >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Sélectionner une devise" />
               </SelectTrigger>
@@ -180,13 +230,26 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
             <Label htmlFor="exchangeRate" className="text-right">
               Taux de change
             </Label>
-            <Input id="exchangeRate" type="number" placeholder="1.00" className="col-span-3" value={exchangeRate} onChange={(e) => setExchangeRate(e.target.value)} />
+            <Input
+              id="exchangeRate"
+              type="number"
+              placeholder="1.00"
+              className="col-span-3"
+              value={exchangeRate}
+              onChange={(e) => setExchangeRate(e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="description" className="text-right">
               Description
             </Label>
-            <Textarea id="description" placeholder="Description du mouvement" className="col-span-3" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Textarea
+              id="description"
+              placeholder="Description du mouvement"
+              className="col-span-3"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="date" className="text-right">
@@ -232,7 +295,24 @@ export function AddMovementModal({ children, onMovementAdded }: AddMovementModal
               </SelectContent>
             </Select>
           </div>
-          <Button type="submit" className="w-full">Ajouter</Button>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="isSale" className="text-right">
+              Vente
+            </Label>
+            <div className="col-span-3 flex items-center space-x-3">
+              <Switch
+                id="isSale"
+                checked={isSale}
+                onCheckedChange={setIsSale}
+              />
+              <Label htmlFor="isSale" className="text-sm font-normal">
+                Vente trondro
+              </Label>
+            </div>
+          </div>
+          <Button type="submit" className="w-full">
+            Ajouter
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

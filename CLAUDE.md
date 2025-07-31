@@ -81,3 +81,4 @@ src/
 
 ## Development Guidelines
 - When a migration is generated, please rename it following the existing name of other migration
+- When you rename a migration, do not forget to do the same in the meta/_journal.json required to be the same for drizzle

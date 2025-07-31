@@ -296,13 +296,14 @@ export default function MovementsPage() {
                   <TableHead>Description</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Responsable</TableHead>
+                  <TableHead>Vente</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {movements.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center">
+                    <TableCell colSpan={7} className="text-center">
                       Aucun mouvement trouvé.
                     </TableCell>
                   </TableRow>
@@ -326,6 +327,15 @@ export default function MovementsPage() {
                         {new Date(movement.date).toLocaleDateString()}
                       </TableCell>
                       <TableCell>{movement.responsible}</TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          movement.isSale 
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                        }`}>
+                          {movement.isSale ? 'Vente' : 'Normal'}
+                        </span>
+                      </TableCell>
                       <TableCell className="flex items-center space-x-2">
                         <Button
                           variant="ghost"

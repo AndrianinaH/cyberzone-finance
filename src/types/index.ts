@@ -9,6 +9,7 @@ export interface Movement {
   date: Date;
   author: string; // user connecté
   responsible: string; // user sélectionné
+  isSale: boolean; // vente (recette régulière)
   createdAt: Date;
   updatedAt: Date;
 }

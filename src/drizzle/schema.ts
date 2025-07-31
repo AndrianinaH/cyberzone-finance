@@ -5,6 +5,7 @@ import {
   timestamp,
   uniqueIndex,
   decimal,
+  boolean,
 } from "drizzle-orm/mysql-core";
 import { relations } from "drizzle-orm";
 
@@ -47,6 +48,7 @@ export const movements = mysqlTable("movements", {
   date: timestamp("date", { mode: "date" }).notNull(),
   author: text("author").notNull(),
   responsible: text("responsible").notNull(),
+  isSale: boolean("is_sale").notNull().default(false),
 
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),

@@ -95,6 +95,7 @@ export async function POST(req: Request) {
       date,
       author,
       responsible,
+      isSale,
     } = body;
 
     if (
@@ -128,6 +129,7 @@ export async function POST(req: Request) {
       date: new Date(date),
       author: author,
       responsible: responsible,
+      isSale: isSale || false,
     });
 
     return NextResponse.json(
@@ -171,6 +173,7 @@ export async function PUT(req: Request) {
       description,
       date,
       responsible,
+      isSale,
     } = body;
 
     if (
@@ -203,6 +206,7 @@ export async function PUT(req: Request) {
         description,
         date: new Date(date),
         responsible,
+        isSale: isSale !== undefined ? isSale : false,
       })
       .where(
         and(

@@ -1,0 +1,1 @@
+ALTER TABLE `movements` ADD `is_sale` boolean DEFAULT false NOT NULL;
