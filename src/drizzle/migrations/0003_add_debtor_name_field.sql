@@ -1,0 +1,1 @@
+ALTER TABLE `trosa` ADD `debtor_name` text NOT NULL;

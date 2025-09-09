@@ -18,6 +18,7 @@ export interface Trosa {
   id: string;
   userId: number;
   description: string;
+  debtorName: string; // nom du débiteur
   montantTotal: number;
   datePaiement?: Date; // rempli quand entièrement payé
   isPaid: boolean; // statut de paiement

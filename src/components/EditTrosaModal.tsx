@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Trosa } from "@/types";
+import { AutocompleteInput } from "@/components/AutocompleteInput";
 
 interface EditTrosaModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export function EditTrosaModal({
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     description: "",
+    debtorName: "",
     montantTotal: "",
   });
   const { toast } = useToast();
@@ -37,6 +39,7 @@ export function EditTrosaModal({
     if (trosa) {
       setFormData({
         description: trosa.description,
+        debtorName: trosa.debtorName,
         montantTotal: trosa.montantTotal.toString(),
       });
     }
@@ -54,7 +57,8 @@ export function EditTrosaModal({
         },
         body: JSON.stringify({
           description: formData.description,
-          montantTotal: parseFloat(formData.montantTotal),
+          debtorName: formData.debtorName,
+          montantTotal: formData.montantTotal ? parseFloat(formData.montantTotal) : 0,
         }),
       });
 
@@ -116,19 +120,28 @@ export function EditTrosaModal({
               className="resize-none"
             />
           </div>
+
+          <AutocompleteInput
+            label="Nom du débiteur"
+            placeholder="Nom de la personne qui doit l'argent..."
+            value={formData.debtorName}
+            onChange={(value) => setFormData(prev => ({ ...prev, debtorName: value }))}
+            apiEndpoint="/api/trosa/debtors"
+            id="debtorName"
+            required
+          />
           
           <div className="space-y-2">
-            <Label htmlFor="montantTotal">Montant Total (MGA)</Label>
+            <Label htmlFor="montantTotal">Montant Total (MGA) - Optionnel</Label>
             <Input
               id="montantTotal"
               name="montantTotal"
               type="number"
-              placeholder="0.00"
+              placeholder="0.00 (à définir plus tard)"
               step="0.01"
               min="0"
               value={formData.montantTotal}
               onChange={handleInputChange}
-              required
             />
           </div>
 

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { trosa, trosaPayments } from "@/drizzle/schema";
-import { and, desc, eq, count, ilike } from "drizzle-orm";
+import { and, desc, eq, count, ilike, or } from "drizzle-orm";
 
 export async function GET(req: Request) {
   try {
@@ -23,7 +23,12 @@ export async function GET(req: Request) {
     const whereClauses = [];
     
     if (searchTerm) {
-      whereClauses.push(ilike(trosa.description, `%${searchTerm}%`));
+      whereClauses.push(
+        or(
+          ilike(trosa.description, `%${searchTerm}%`),
+          ilike(trosa.debtorName, `%${searchTerm}%`)
+        )
+      );
     }
     
     if (status && status !== "all") {
@@ -90,16 +95,16 @@ export async function POST(req: Request) {
 
     const userId = session.user.id;
     const body = await req.json();
-    const { description, montantTotal } = body;
+    const { description, debtorName, montantTotal } = body;
 
-    if (!description || !montantTotal) {
+    if (!description || !debtorName) {
       return NextResponse.json(
-        { message: "Tous les champs requis ne sont pas fournis" },
+        { message: "Description et nom du débiteur sont requis" },
         { status: 400 },
       );
     }
 
-    if (parseFloat(montantTotal) <= 0) {
+    if (montantTotal && parseFloat(montantTotal) <= 0) {
       return NextResponse.json(
         { message: "Le montant total doit être supérieur à 0" },
         { status: 400 },
@@ -109,7 +114,8 @@ export async function POST(req: Request) {
     await db.insert(trosa).values({
       userId: Number(userId),
       description: description,
-      montantTotal: montantTotal.toString(),
+      debtorName: debtorName,
+      montantTotal: montantTotal ? montantTotal.toString() : "0",
       isPaid: false,
     });
 
@@ -146,16 +152,16 @@ export async function PUT(req: Request) {
 
     const userId = session.user.id;
     const body = await req.json();
-    const { description, montantTotal } = body;
+    const { description, debtorName, montantTotal } = body;
 
-    if (!description || !montantTotal) {
+    if (!description || !debtorName) {
       return NextResponse.json(
-        { message: "Tous les champs requis ne sont pas fournis" },
+        { message: "Description et nom du débiteur sont requis" },
         { status: 400 },
       );
     }
 
-    if (parseFloat(montantTotal) <= 0) {
+    if (montantTotal && parseFloat(montantTotal) <= 0) {
       return NextResponse.json(
         { message: "Le montant total doit être supérieur à 0" },
         { status: 400 },
@@ -166,7 +172,8 @@ export async function PUT(req: Request) {
       .update(trosa)
       .set({
         description,
-        montantTotal: montantTotal.toString(),
+        debtorName,
+        montantTotal: montantTotal ? montantTotal.toString() : "0",
       })
       .where(
         and(

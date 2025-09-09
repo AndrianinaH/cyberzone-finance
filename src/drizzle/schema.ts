@@ -68,6 +68,7 @@ export const trosa = mysqlTable("trosa", {
     .notNull()
     .references(() => users.id),
   description: text("description").notNull(),
+  debtorName: text("debtor_name").notNull(),
   montantTotal: decimal("montant_total", { precision: 10, scale: 2 }).notNull(),
   datePaiement: timestamp("date_paiement", { mode: "date" }),
   isPaid: boolean("is_paid").notNull().default(false),
