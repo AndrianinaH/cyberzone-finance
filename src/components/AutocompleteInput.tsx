@@ -32,15 +32,10 @@ export function AutocompleteInput({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchSuggestions = async (query: string) => {
-    if (!query.trim()) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
     setLoading(true);
     try {
-      const response = await fetch(`${apiEndpoint}?q=${encodeURIComponent(query)}`);
+      const url = query.trim() ? `${apiEndpoint}?q=${encodeURIComponent(query)}` : apiEndpoint;
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setSuggestions(data.debtors || []);
@@ -49,6 +44,7 @@ export function AutocompleteInput({
     } catch (error) {
       console.error("Error fetching suggestions:", error);
       setSuggestions([]);
+      setShowSuggestions(false);
     } finally {
       setLoading(false);
     }
@@ -104,8 +100,11 @@ export function AutocompleteInput({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onFocus={() => {
-          if (value.trim() && suggestions.length > 0) {
+          if (suggestions.length > 0) {
             setShowSuggestions(true);
+          } else {
+            // Charger les suggestions existantes au focus
+            fetchSuggestions(value);
           }
         }}
         required={required}
@@ -113,14 +112,19 @@ export function AutocompleteInput({
         autoComplete="off"
       />
       
-      {showSuggestions && suggestions.length > 0 && (
+      {showSuggestions && (
         <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
           {loading && (
             <div className="px-3 py-2 text-sm text-gray-500">
               Recherche...
             </div>
           )}
-          {!loading && suggestions.map((suggestion, index) => (
+          {!loading && suggestions.length === 0 && (
+            <div className="px-3 py-2 text-sm text-gray-500">
+              Aucun nom trouvé. Tapez un nouveau nom.
+            </div>
+          )}
+          {!loading && suggestions.length > 0 && suggestions.map((suggestion, index) => (
             <button
               key={index}
               type="button"
