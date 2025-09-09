@@ -40,6 +40,7 @@ import { TrosaPaymentsModal } from '@/components/TrosaPaymentsModal';
 export default function TrosaPage() {
   const [trosaList, setTrosaList] = useState<Trosa[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPaymentsModalOpen, setIsPaymentsModalOpen] = useState(false);
   const [selectedTrosa, setSelectedTrosa] = useState<Trosa | null>(null);
@@ -50,8 +51,13 @@ export default function TrosaPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const fetchTrosa = useCallback(async () => {
-    setLoading(true);
+  const fetchTrosa = useCallback(async (showLoader = false) => {
+    if (showLoader || trosaList.length === 0) {
+      setLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
+    
     try {
       const params = new URLSearchParams({
         page: String(currentPage),
@@ -82,8 +88,9 @@ export default function TrosaPage() {
       });
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
-  }, [toast, currentPage, itemsPerPage, searchTerm, statusFilter]);
+  }, [toast, currentPage, itemsPerPage, searchTerm, statusFilter, trosaList.length]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -116,7 +123,7 @@ export default function TrosaPage() {
           description: 'Trosa supprimé avec succès.',
           variant: 'success',
         });
-        fetchTrosa();
+        fetchTrosa(true);
       } else {
         const errorData = await res.json();
         toast({
@@ -150,7 +157,12 @@ export default function TrosaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Trosa Récents</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            Trosa Récents
+            {isRefreshing && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 dark:border-gray-100"></div>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className='flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 mb-4'>
@@ -172,7 +184,7 @@ export default function TrosaPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className='overflow-x-auto'>
+          <div className={`overflow-x-auto transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -319,7 +331,7 @@ export default function TrosaPage() {
         </CardContent>
       </Card>
 
-      <AddTrosaModal onTrosaAdded={fetchTrosa}>
+      <AddTrosaModal onTrosaAdded={() => fetchTrosa(true)}>
         <Button
           className='fixed bottom-8 right-8 h-14 w-14 rounded-full shadow-lg p-0 flex items-center justify-center'
           size='icon'
@@ -334,13 +346,13 @@ export default function TrosaPage() {
             isOpen={isEditModalOpen}
             onOpenChange={setIsEditModalOpen}
             trosa={selectedTrosa}
-            onTrosaUpdated={fetchTrosa}
+            onTrosaUpdated={() => fetchTrosa(true)}
           />
           <TrosaPaymentsModal
             isOpen={isPaymentsModalOpen}
             onOpenChange={setIsPaymentsModalOpen}
             trosa={selectedTrosa}
-            onPaymentAdded={fetchTrosa}
+            onPaymentAdded={() => fetchTrosa(true)}
           />
         </>
       )}
