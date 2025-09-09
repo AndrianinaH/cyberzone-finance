@@ -48,7 +48,7 @@ export default function TrosaPage() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalTrosa, setTotalTrosa] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const fetchTrosa = useCallback(async () => {
     setLoading(true);

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { trosa } from "@/drizzle/schema";
-import { eq, ilike, desc, and } from "drizzle-orm";
+import { eq, like, desc, and } from "drizzle-orm";
 
 export async function GET(req: Request) {
   try {
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
         .where(
           and(
             eq(trosa.userId, userId),
-            ilike(trosa.debtorName, `%${query}%`)
+            like(trosa.debtorName, `%${query}%`)
           )
         )
         .orderBy(desc(trosa.createdAt))

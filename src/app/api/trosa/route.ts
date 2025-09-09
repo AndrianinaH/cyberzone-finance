@@ -1,40 +1,42 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { trosa, trosaPayments } from "@/drizzle/schema";
-import { and, desc, eq, count, ilike, or } from "drizzle-orm";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { trosa, trosaPayments } from '@/drizzle/schema';
+import { and, desc, eq, count, like, or } from 'drizzle-orm';
 
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+      return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '10', 10);
     const offset = (page - 1) * limit;
-    const searchTerm = searchParams.get("q") || "";
-    const status = searchParams.get("status") || ""; // active, paid, all
+    const searchTerm = searchParams.get('q') || '';
+    const status = searchParams.get('status') || ''; // active, paid, all
+    const userId = Number(session.user.id);
 
-    const whereClauses = [];
-    
+    const whereClauses = [eq(trosa.userId, userId)];
+
     if (searchTerm) {
-      whereClauses.push(
-        or(
-          ilike(trosa.description, `%${searchTerm}%`),
-          ilike(trosa.debtorName, `%${searchTerm}%`)
-        )
+      const searchCondition = or(
+        like(trosa.description, `%${searchTerm}%`),
+        like(trosa.debtorName, `%${searchTerm}%`),
       );
+      if (searchCondition) {
+        whereClauses.push(searchCondition);
+      }
     }
-    
-    if (status && status !== "all") {
-      if (status === "active") {
+
+    if (status && status !== 'all') {
+      if (status === 'active') {
         whereClauses.push(eq(trosa.isPaid, false));
-      } else if (status === "paid") {
+      } else if (status === 'paid') {
         whereClauses.push(eq(trosa.isPaid, true));
       }
     }
@@ -55,7 +57,10 @@ export async function GET(req: Request) {
           .from(trosaPayments)
           .where(eq(trosaPayments.trosaId, t.id));
 
-        const totalPaid = payments.reduce((sum, payment) => sum + parseFloat(payment.montant), 0);
+        const totalPaid = payments.reduce(
+          (sum, payment) => sum + parseFloat(payment.montant),
+          0,
+        );
         const remainingAmount = parseFloat(t.montantTotal) - totalPaid;
 
         return {
@@ -64,7 +69,7 @@ export async function GET(req: Request) {
           totalPaid,
           remainingAmount,
         };
-      })
+      }),
     );
 
     const totalTrosa = await db
@@ -77,9 +82,9 @@ export async function GET(req: Request) {
       totalTrosa: totalTrosa[0].value,
     });
   } catch (error) {
-    console.error("Error fetching trosa:", error);
+    console.error('Error fetching trosa:', error);
     return NextResponse.json(
-      { message: "Erreur interne du serveur" },
+      { message: 'Erreur interne du serveur' },
       { status: 500 },
     );
   }
@@ -90,7 +95,7 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+      return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -99,14 +104,14 @@ export async function POST(req: Request) {
 
     if (!description || !debtorName) {
       return NextResponse.json(
-        { message: "Description et nom du débiteur sont requis" },
+        { message: 'Description et nom du débiteur sont requis' },
         { status: 400 },
       );
     }
 
     if (montantTotal && parseFloat(montantTotal) <= 0) {
       return NextResponse.json(
-        { message: "Le montant total doit être supérieur à 0" },
+        { message: 'Le montant total doit être supérieur à 0' },
         { status: 400 },
       );
     }
@@ -115,18 +120,18 @@ export async function POST(req: Request) {
       userId: Number(userId),
       description: description,
       debtorName: debtorName,
-      montantTotal: montantTotal ? montantTotal.toString() : "0",
+      montantTotal: montantTotal ? montantTotal.toString() : '0',
       isPaid: false,
     });
 
     return NextResponse.json(
-      { message: "Trosa ajouté avec succès" },
+      { message: 'Trosa ajouté avec succès' },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Error adding trosa:", error);
+    console.error('Error adding trosa:', error);
     return NextResponse.json(
-      { message: "Erreur interne du serveur" },
+      { message: 'Erreur interne du serveur' },
       { status: 500 },
     );
   }
@@ -137,15 +142,15 @@ export async function PUT(req: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+      return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const id = searchParams.get('id');
 
     if (!id) {
       return NextResponse.json(
-        { message: "ID du trosa manquant" },
+        { message: 'ID du trosa manquant' },
         { status: 400 },
       );
     }
@@ -156,14 +161,14 @@ export async function PUT(req: Request) {
 
     if (!description || !debtorName) {
       return NextResponse.json(
-        { message: "Description et nom du débiteur sont requis" },
+        { message: 'Description et nom du débiteur sont requis' },
         { status: 400 },
       );
     }
 
     if (montantTotal && parseFloat(montantTotal) <= 0) {
       return NextResponse.json(
-        { message: "Le montant total doit être supérieur à 0" },
+        { message: 'Le montant total doit être supérieur à 0' },
         { status: 400 },
       );
     }
@@ -173,23 +178,18 @@ export async function PUT(req: Request) {
       .set({
         description,
         debtorName,
-        montantTotal: montantTotal ? montantTotal.toString() : "0",
+        montantTotal: montantTotal ? montantTotal.toString() : '0',
       })
-      .where(
-        and(
-          eq(trosa.id, parseInt(id)),
-          eq(trosa.userId, Number(userId)),
-        ),
-      );
+      .where(and(eq(trosa.id, parseInt(id)), eq(trosa.userId, Number(userId))));
 
     return NextResponse.json(
-      { message: "Trosa mis à jour avec succès" },
+      { message: 'Trosa mis à jour avec succès' },
       { status: 200 },
     );
   } catch (error) {
-    console.error("Error updating trosa:", error);
+    console.error('Error updating trosa:', error);
     return NextResponse.json(
-      { message: "Erreur interne du serveur" },
+      { message: 'Erreur interne du serveur' },
       { status: 500 },
     );
   }
@@ -200,15 +200,15 @@ export async function DELETE(req: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-      return NextResponse.json({ message: "Non autorisé" }, { status: 401 });
+      return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const id = searchParams.get('id');
 
     if (!id) {
       return NextResponse.json(
-        { message: "ID du trosa manquant" },
+        { message: 'ID du trosa manquant' },
         { status: 400 },
       );
     }
@@ -223,21 +223,16 @@ export async function DELETE(req: Request) {
     // Puis supprimer le trosa
     await db
       .delete(trosa)
-      .where(
-        and(
-          eq(trosa.id, parseInt(id)),
-          eq(trosa.userId, Number(userId)),
-        ),
-      );
+      .where(and(eq(trosa.id, parseInt(id)), eq(trosa.userId, Number(userId))));
 
     return NextResponse.json(
-      { message: "Trosa supprimé avec succès" },
+      { message: 'Trosa supprimé avec succès' },
       { status: 200 },
     );
   } catch (error) {
-    console.error("Error deleting trosa:", error);
+    console.error('Error deleting trosa:', error);
     return NextResponse.json(
-      { message: "Erreur interne du serveur" },
+      { message: 'Erreur interne du serveur' },
       { status: 500 },
     );
   }
