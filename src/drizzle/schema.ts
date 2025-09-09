@@ -28,6 +28,7 @@ export const users = mysqlTable(
 
 export const usersRelations = relations(users, ({ many }) => ({
   movements: many(movements),
+  trosa: many(trosa),
 }));
 
 export const movements = mysqlTable("movements", {
@@ -58,5 +59,45 @@ export const movementsRelations = relations(movements, ({ one }) => ({
   author: one(users, {
     fields: [movements.userId],
     references: [users.id],
+  }),
+}));
+
+export const trosa = mysqlTable("trosa", {
+  id: int("id").primaryKey().autoincrement(),
+  userId: int("user_id")
+    .notNull()
+    .references(() => users.id),
+  description: text("description").notNull(),
+  montantTotal: decimal("montant_total", { precision: 10, scale: 2 }).notNull(),
+  datePaiement: timestamp("date_paiement", { mode: "date" }),
+  isPaid: boolean("is_paid").notNull().default(false),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const trosaRelations = relations(trosa, ({ one, many }) => ({
+  user: one(users, {
+    fields: [trosa.userId],
+    references: [users.id],
+  }),
+  payments: many(trosaPayments),
+}));
+
+export const trosaPayments = mysqlTable("trosa_payments", {
+  id: int("id").primaryKey().autoincrement(),
+  trosaId: int("trosa_id")
+    .notNull()
+    .references(() => trosa.id),
+  montant: decimal("montant", { precision: 10, scale: 2 }).notNull(),
+  datePaiement: timestamp("date_paiement", { mode: "date" }).notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+});
+
+export const trosaPaymentsRelations = relations(trosaPayments, ({ one }) => ({
+  trosa: one(trosa, {
+    fields: [trosaPayments.trosaId],
+    references: [trosa.id],
   }),
 }));

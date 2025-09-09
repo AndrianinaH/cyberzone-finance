@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Home, ListChecks, User, LogOut } from "lucide-react";
+import { Home, ListChecks, User, LogOut, CreditCard } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { MobileNav } from "./MobileNav";
 import { usePathname } from "next/navigation";
@@ -39,6 +39,12 @@ export default function Header() {
             <Link href="/movements">
               <ListChecks className="h-4 w-4 mr-2" />
               Mouvements
+            </Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link href="/trosa">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Trosa
             </Link>
           </Button>
           <DropdownMenu>

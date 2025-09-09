@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, Home, ListChecks, User, LogOut } from "lucide-react";
+import { Menu, Home, ListChecks, User, LogOut, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -46,6 +46,14 @@ export function MobileNav() {
             >
               <ListChecks className="h-5 w-5" />
               Mouvements
+            </Link>
+            <Link
+              href="/trosa"
+              className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+              onClick={() => setOpen(false)}
+            >
+              <CreditCard className="h-5 w-5" />
+              Trosa
             </Link>
             <Link
               href="/profile"

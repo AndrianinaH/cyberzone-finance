@@ -15,6 +15,13 @@
       "when": 1753977667606,
       "tag": "0001_add_is_sale_field",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1757414920409,
+      "tag": "0002_add_trosa_tables",
+      "breakpoints": true
     }
   ]
 }
